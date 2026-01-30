@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modelo IA – Media Maratón</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #111827;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+    }
+    .inputs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:hover {
+      background: #1e40af;
+    }
+    .result {
+      margin-top: 25px;
+    }
+    canvas {
+      margin-top: 25px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Modelo de IA – Planificador de Media Maratón</h1>
+  <p>Recomendación inteligente de kilómetros diarios</p>
+</header>
+
+<div class="container">
+  <h2>Inputs del corredor</h2>
+
+  <div class="inputs">
+    <div>
+      <label>Kilómetros semana anterior</label>
+      <input type="number" id="kmActual" value="22" />
+    </div>
+    <div>
+      <label>Días disponibles</label>
+      <input type="number" id="dias" value="4" />
+    </div>
+    <div>
+      <label>Esfuerzo percibido</label>
+      <select id="esfuerzo">
+        <option value="1">Bajo</option>
+        <option value="2" selected>Medio</option>
+        <option value="3">Alto</option>
+      </select>
+    </div>
+    <div>
+      <label>% Cumplimiento</label>
+      <input type="number" id="cumplimiento" value="90" />
+    </div>
+  </div>
+
+  <button onclick="calcularPlan()">Generar Plan</button>
+
+  <div class="result">
+    <h2>Plan semanal recomendado</h2>
+    <canvas id="planChart"></canvas>
+  </div>
+</div>
+
+<script>
+let chart;
+
+function calcularPlan() {
+  const kmActual = parseFloat(document.getElementById('kmActual').value);
+  const esfuerzo = parseInt(document.getElementById('esfuerzo').value);
+  const cumplimiento = parseFloat(document.getElementById('cumplimiento').value);
+
+  let kmNuevo = kmActual;
+
+  if (esfuerzo === 3) {
+    kmNuevo = kmActual * 0.95;
+  } else if (esfuerzo === 1 && cumplimiento >= 80) {
+    kmNuevo = kmActual * 1.1;
+  } else if (cumplimiento >= 80) {
+    kmNuevo = kmActual * 1.1;
+  }
+
+  const data = {
+    lunes: kmNuevo * 0.25,
+    miercoles: kmNuevo * 0.30,
+    viernes: kmNuevo * 0.25,
+    domingo: kmNuevo * 0.20
+  };
+
+  renderChart(data);
+}
+
+function renderChart(data) {
+  const ctx = document.getElementById('planChart').getContext('2d');
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Lunes', 'Miércoles', 'Viernes', 'Domingo'],
+      datasets: [{
+        label: 'Kilómetros recomendados',
+        data: [data.lunes, data.miercoles, data.viernes, data.domingo]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+calcularPlan();
+</script>
+
+</body>
+</html>
